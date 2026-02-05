@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import axios from 'axios';
 import * as yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-hot-toast'; // لازم تكون كدة
 export default function SignUp() {
   const [apiError, setapiError] = useState(null);
   const [isLoading, setisLoading] = useState(false);
@@ -11,13 +11,14 @@ export default function SignUp() {
 
  async function handleSignUp(values) {
     setisLoading(true);
-    setapiError(null); // تصفير الخطأ مع كل محاولة جديدة
+    setapiError(null); 
     const dataWithAge = { ...values, age: Number(values.age) };
     
     axios.post('https://smart-notes-backend-production.up.railway.app/api/register/', dataWithAge)
       .then((res) => {
         if (res?.data?.msg === 'done') {
-          toast.success("Account created successfully!"); // لو حابة تظهري توست نجاح
+
+          toast.success("Account created successfully!"); 
           navigate('/login');
         }
       })

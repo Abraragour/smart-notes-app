@@ -9,7 +9,6 @@ import UsercontextProvider from './Context/userContext'
 import Auth from './Components/Auth/Auth';
 import NoteContextProvider from './Context/noteContext'
 import { Toaster } from 'react-hot-toast'
-
 function App() {
 
   let x = createBrowserRouter([
