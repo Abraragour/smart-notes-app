@@ -7,7 +7,6 @@ export default function Home() {
   const [allNotes, setAllNotes] = useState(null); 
   const { addNotes, getallUserNotes, deleteNote, updateNote } = useContext(noteContext); 
   
-  // بنجيب الـ id والتوكن عشان نستخدمهم في الحماية والفلترة
   const [id, setId] = useState(localStorage.getItem('myId')); 
   const userToken = localStorage.getItem('userToken');
 
@@ -17,33 +16,35 @@ export default function Home() {
   const [currentNoteId, setCurrentNoteId] = useState(null);
 
   useEffect(() => { 
-    // لو مفيش توكن، مفيش داعي ينادي البيانات أصلاً
     if (userToken) {
         handlegetallUserNotes(); 
     }
   }, [userToken])
 
-  async function handlegetallUserNotes() {
+async function handlegetallUserNotes() {
     let res = await getallUserNotes();
-    if (res?.notes) setAllNotes(res.notes);
-    else setAllNotes([]);
+    
+    if (res && res.data && res.data.notes) {
+      setAllNotes(res.data.notes);
+    } else {
+      setAllNotes([]);
+    }
   }
-
-  async function handleSubmit(e) {
+ async function handleSubmit(e) {
     e.preventDefault();
+    async function handleSubmit(e) {
+    e.preventDefault();
+   
+}
     if (!note.title || !note.content) return toast.error("Fields are required");
     const loadingToast = toast.loading(isEdit ? 'Updating...' : 'Saving...');
     try {
       let response = isEdit ? await updateNote(currentNoteId, note) : await addNotes(note);
+      
       if (response?.data?.msg === "done") {
-        if (!isEdit) {
-          const ownerId = response.data.note.createdBy;
-          setId(ownerId);
-          localStorage.setItem('myId', ownerId);
-        }
         toast.success(isEdit ? 'Updated!' : 'Added!', { id: loadingToast });
         closeModal();
-        handlegetallUserNotes();
+        handlegetallUserNotes(); 
       }
     } catch (error) { toast.error('Error', { id: loadingToast }); }
   }
@@ -69,7 +70,7 @@ export default function Home() {
   function openEditModal(e, noteItem) {
     e.stopPropagation(); 
     setNote({ title: noteItem.title, content: noteItem.content });
-    setCurrentNoteId(noteItem._id);
+    setCurrentNoteId(noteItem.id);
     setIsEdit(true);
     setIsView(false);
     setIsOpen(true);
@@ -104,12 +105,11 @@ export default function Home() {
           {allNotes === null ? (
             <div className="col-span-full text-center py-20 text-gray-300 animate-pulse text-2xl font-bold">Loading your notes...</div>
           ) : (
-            // --- التعديل الجوهري هنا ---
-            // بنفلتر المصفوفة الأول، ولو ناتج الفلترة فيه داتا بنعرضها، غير كدة بنعرض رسالة "No notes"
-            allNotes.filter(n => n.createdBy === id).length > 0 ? (
-              allNotes.filter(n => n.createdBy === id).map((noteItem) => (
+            
+            allNotes.length > 0 ? (
+              allNotes.map((noteItem) => (
                 <div 
-                  key={noteItem._id} 
+                  key={noteItem.id} 
                   onClick={() => openViewModal(noteItem)} 
                   className="bg-white rounded-[2.5rem] p-9 shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-500 group cursor-pointer"
                 >
@@ -117,13 +117,13 @@ export default function Home() {
                     <h3 className="font-bold text-gray-800 text-xl line-clamp-1">{noteItem.title}</h3>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={(e) => openEditModal(e, noteItem)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors"><i className="fa-solid fa-pen text-xs"></i></button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(noteItem._id); }} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><i className="fa-solid fa-trash text-xs"></i></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(noteItem.id); }} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><i className="fa-solid fa-trash text-xs"></i></button>
                     </div>
                   </div>
                   <p className="text-gray-500 text-sm italic leading-relaxed line-clamp-4 min-h-[80px]">"{noteItem.content}"</p>
                   <div className="mt-8 pt-5 border-t border-gray-50 flex items-center justify-between">
                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">
-                       {new Date(noteItem.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                       {new Date(noteItem.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                      </span>
                      <i className="fa-solid fa-bookmark text-[#38b29b]/20"></i>
                   </div>

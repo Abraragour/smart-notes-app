@@ -14,13 +14,12 @@ export default function Login() {
 
   const navigate = useNavigate();
   const validationSchema = yup.object({
-   email: yup.string()
-      .email("Please enter a valid email address")
-      .required("Email is required"),
-      
+   username: yup.string()
+      .required("Username/Email is required"),
     password: yup.string()
-      .matches(/^[A-Z][a-z0-9]{5,10}$/, "Password must start with uppercase and be 6-10 characters")
-      .required("Password is required"),
+      .min(8, "Password must be at least 8 characters")
+      .required("Password is required")
+       
   });
 
 
@@ -28,7 +27,11 @@ export default function Login() {
 
   function handleLogin(formValues) {
     setIsLoading(true);
-    axios.post(`https://note-sigma-black.vercel.app/api/v1/users/signIn`, formValues)
+    const dataToSend = {
+      username: formValues.username, 
+      password: formValues.password
+    };
+    axios.post(`https://smart-notes-backend-production.up.railway.app/api/login/`, dataToSend)
       .then((response) => {
         setIsSuccess(response.data.msg)
         if (response?.data?.msg === 'done') {
@@ -42,15 +45,19 @@ export default function Login() {
         console.log(response);
        })
       .catch((error) => { 
-        setIsLoading(false)
-        setIsError(error?.response?.data?.msg);
-        console.log(error);
-      })
+  setIsLoading(false);
+  const errorData = error?.response?.data;
+  const errorMsg = errorData?.non_field_errors?.[0] || errorData?.msg || "Invalid username or password";
+  
+  setIsError(errorMsg);
+  toast.error(errorMsg);
+  console.log("Login Error:", error);
+})
     
   }
 
   let formik = useFormik({
-    initialValues: { email: '', password: '' },
+    initialValues: { username: '', password: '' },
     onSubmit: handleLogin,
     validationSchema
   })
@@ -66,13 +73,12 @@ export default function Login() {
                     {iserror&& <div className="mb-2 text-red-500 text-[10px] text-center">{iserror}</div>}
 
       <div className="space-y-4 w-full max-w-[320px] flex flex-col">
-        {['email', 'password'].map((field) => (
+        {['username', 'password'].map((field) => (
           <div key={field} className="w-full">
             <input
               name={field}
-              type={field === 'password' ? 'password' : 'email'}
-              placeholder={field.toUpperCase()}
-              value={formik.values[field]}
+              type={field === 'password' ? 'password' : 'text'}
+placeholder={field === 'username' ? 'EMAIL / USERNAME' : field.toUpperCase()}              value={formik.values[field]}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               className="w-full px-5 py-3 bg-[#f4f8f7] border-none rounded-xl focus:ring-2 focus:ring-[#38b29b] outline-none transition-all placeholder-gray-400 text-gray-600 text-sm"

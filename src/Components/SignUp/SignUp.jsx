@@ -12,20 +12,19 @@ export default function SignUp() {
   async function handleSignUp(values) {
     setisLoading(true);
     const dataWithAge = { ...values, age: Number(values.age) };
-    axios.post('https://note-sigma-black.vercel.app/api/v1/users/signUp', dataWithAge)
+    axios.post('https://smart-notes-backend-production.up.railway.app/api/register/', dataWithAge)
       .then((res) => {
         if (res?.data?.msg === 'done') navigate('/login');
       })
       .catch((err) => {
-        setapiError(err?.response?.data?.msg);
-      })
+        setapiError(err?.response?.data?.email?.[0] || err?.response?.data?.msg || "Something went wrong");       })
       .finally(() => setisLoading(false));
   }
 
  const validationSchema = yup.object({
   name: yup.string()
     .min(3, "Name must be at least 3 characters")
-    .max(10, "Name cannot exceed 10 characters")
+    .max(25, "Name cannot exceed 25 characters")
     .required("Name is required"),
     
   email: yup.string()
@@ -33,7 +32,7 @@ export default function SignUp() {
     .required("Email is required"),
     
   password: yup.string()
-    .matches(/^[A-Z][a-z0-9]{5,10}$/, "Password must start with uppercase and be 6-10 characters")
+    .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
     
   age: yup.number()
