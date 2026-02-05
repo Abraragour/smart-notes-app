@@ -22,10 +22,10 @@ export default function SignUp() {
   }
 
  const validationSchema = yup.object({
-  name: yup.string()
-    .min(3, "Name must be at least 3 characters")
-    .max(25, "Name cannot exceed 25 characters")
-    .required("Name is required"),
+  username: yup.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(25, "Username cannot exceed 25 characters")
+    .required("Username is required"),
     
   email: yup.string()
     .email("Please enter a valid email address")
@@ -47,7 +47,7 @@ export default function SignUp() {
 });
 
   const formik = useFormik({
-    initialValues: { name: '', email: '', password: '', age: '', phone: '' },
+    initialValues: { username: '', email: '', password: '', age: '', phone: '' },
     onSubmit: handleSignUp,
     validationSchema,
   });
@@ -62,7 +62,7 @@ export default function SignUp() {
       {apiError && <div className="mb-2 text-red-500 text-[10px] text-center">{apiError}</div>}
 
       <div className="w-full max-w-[320px] space-y-2">
-        {['name', 'email', 'password', 'age', 'phone'].map((field) => (
+        {['username', 'email', 'password', 'age', 'phone'].map((field) => (
           <div key={field} className="w-full">
             <input
               id={field}
