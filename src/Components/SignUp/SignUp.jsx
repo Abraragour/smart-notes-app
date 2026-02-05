@@ -9,15 +9,36 @@ export default function SignUp() {
   const [isLoading, setisLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSignUp(values) {
+ async function handleSignUp(values) {
     setisLoading(true);
+    setapiError(null); // تصفير الخطأ مع كل محاولة جديدة
     const dataWithAge = { ...values, age: Number(values.age) };
+    
     axios.post('https://smart-notes-backend-production.up.railway.app/api/register/', dataWithAge)
       .then((res) => {
-        if (res?.data?.msg === 'done') navigate('/login');
+        if (res?.data?.msg === 'done') {
+          toast.success("Account created successfully!"); // لو حابة تظهري توست نجاح
+          navigate('/login');
+        }
       })
       .catch((err) => {
-        setapiError(err?.response?.data?.email?.[0] || err?.response?.data?.msg || "Something went wrong");       })
+        const responseData = err?.response?.data;
+
+        if (responseData?.msg === "validation_error" && responseData?.errors) {
+            const errorEntries = Object.entries(responseData.errors);
+            const [field, msgs] = errorEntries[0]; // هنجيب أول حقل فيه مشكلة
+            setapiError(`${field}: ${msgs[0]}`); 
+        } 
+        else if (responseData?.detail) {
+            setapiError(responseData.detail);
+        }
+        else if (responseData?.msg) {
+            setapiError(responseData.msg);
+        }
+        else {
+            setapiError("Something went wrong. Please check your internet or try again.");
+        }
+      })
       .finally(() => setisLoading(false));
   }
 

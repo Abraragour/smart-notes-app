@@ -37,8 +37,7 @@ export default function Login() {
         if (response?.data?.msg === 'done') {
             setuserLogin(response?.data?.token);
             localStorage.setItem('userToken',response?.data?.token);
-            toast.success(response?.data?.msg,{ duration:1000,
-            position:"top-center"});
+           toast.success("Welcome back!", { duration: 1000, position: "top-center" });
           navigate('/home');
         }
          setIsLoading(false)
@@ -47,8 +46,10 @@ export default function Login() {
       .catch((error) => { 
   setIsLoading(false);
   const errorData = error?.response?.data;
-  const errorMsg = errorData?.non_field_errors?.[0] || errorData?.msg || "Invalid username or password";
-  
+const errorMsg = errorData?.detail || 
+                   errorData?.msg || 
+                   errorData?.non_field_errors?.[0] || 
+                   "Invalid username or password";  
   setIsError(errorMsg);
   toast.error(errorMsg);
   console.log("Login Error:", error);
